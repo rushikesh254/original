@@ -28,8 +28,7 @@ import {
 } from "@/actions/recipe.actions";
 import { toast } from "sonner";
 import Image from "next/image";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import { RecipePDF } from "@/components/RecipePDF";
+import { RecipePDF, generatePDF } from "@/components/RecipePDF";
 import { ClockLoader } from "react-spinners";
 import ProLockedSection from "@/components/ProLockedSection";
 
@@ -119,6 +118,30 @@ function RecipeContent() {
       await removeFromCollection(formData);
     } else {
       await saveToCollection(formData);
+    }
+  };
+
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
+  const handleDownloadPDF = async () => {
+    try {
+      setIsGeneratingPDF(true);
+      const pdfBytes = await generatePDF(recipe);
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${recipe.title.replace(/\s+/g, "-").toLowerCase()}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success("PDF generated successfully!");
+    } catch (error) {
+      console.error("PDF generation failed:", error);
+      toast.error("Failed to generate PDF");
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
@@ -320,23 +343,24 @@ function RecipeContent() {
                   </>
                 )}
               </Button>
-              <PDFDownloadLink
-                document={<RecipePDF recipe={recipe} />}
-                fileName={`${recipe.title
-                  .replace(/\s+/g, "-")
-                  .toLowerCase()}.pdf`}
+              <Button
+                variant="outline"
+                className="border-2 border-orange-600 text-orange-700 hover:bg-orange-50 gap-2"
+                onClick={handleDownloadPDF}
+                disabled={isGeneratingPDF}
               >
-                {({ loading }) => (
-                  <Button
-                    variant="outline"
-                    className="border-2 border-orange-600 text-orange-700 hover:bg-orange-50 gap-2"
-                    disabled={loading}
-                  >
+                {isGeneratingPDF ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Preparing PDF...
+                  </>
+                ) : (
+                  <>
                     <Download className="w-4 h-4" />
-                    {loading ? "Preparing PDF..." : "Download PDF"}
-                  </Button>
+                    Download PDF
+                  </>
                 )}
-              </PDFDownloadLink>
+              </Button>
             </div>
           </div>
         </div>

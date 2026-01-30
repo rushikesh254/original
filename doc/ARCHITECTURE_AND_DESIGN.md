@@ -12,8 +12,8 @@ The platform follows a **Decoupled Client-Server Architecture** with a modern Ne
 
 1. **User Action**: User interacts with the UI (e.g., searches for a recipe).
 2. **Server Action**: Next.js triggers a Server Action (Backend-for-Frontend layer).
-3. **External Services**: The Server Action communicates with Google Gemini (AI) and Unsplash (Images).
-4. **Data Persistence**: The processed data is sent to the Express API, which stores it in MongoDB.
+3. **External Services**: The Backend communicates with Google Gemini (AI) and Unsplash (Images).
+4. **Data Persistence**: The Express API processes logic and stores data in MongoDB.
 5. **Response**: Data flows back up to the Next.js frontend to update the UI.
 
 ---
@@ -26,6 +26,7 @@ The backend is built using a **Layered Service-Controller Architecture**:
 - **Layer 2: Routes**: Maps HTTP endpoints to logic (e.g., `/api/auth`, `/api/recipes`).
 - **Layer 3: Models (Mongoose)**: Defines the data structure and business rules (e.g., pass hashing on save).
 - **Layer 4: Middleware**: Intercepts requests for authentication and authorization.
+- **Layer 5: Services (lib/ai)**: Encapsulates external API logic (Gemini, Unsplash) to keep controllers clean.
 
 ---
 
@@ -40,9 +41,11 @@ The frontend leverages the **Next.js App Router** pattern:
   - **Client Components**: Used for interactive sections like forms and modals.
 - **State Management**:
   - **Auth State**: Global via React Context API (`AuthContext`).
-  - **Data State**: Handled via Next.js Server Actions and native `useState`/`useTransition`.
-- **Modular AI Layer**:
-  - Located in `frontend/lib/ai/`, this layer separates complex prompt engineering and API clients from the orchestration logic in Server Actions, improving testability and code reuse.
+  - **Data State**: Handled via Next.js Server Actions (wrapping API calls) and native `useState`/`useTransition`.
+- **API Integration**:
+  - Located in `frontend/actions/`, these files act as **Pure API Wrappers**. They contain NO business logic or AI processing; they simply forward requests to the Backend API and return the response.
+- **Background Tasks (Web Workers)**:
+  - Heavy client-side processing, specifically **PDF Generation**, is offloaded to a dedicated Web Worker (`pdf-worker.js`) to ensure the UI remains responsive and blocks-free.
 
 ---
 
@@ -62,10 +65,14 @@ The API is designed to mimic a Headless CMS (Strapi) structure:
 
 1. **Users**:
    - Fields: `email`, `password`, `subscriptionTier`, `role`.
-   - Index: Unique index on `email`.
+   - Index: Unique index on `email` (Fast lookups).
 2. **Recipes**:
    - Fields: `title`, `description`, `ingredients` (Array), `instructions` (Array), `author` (Ref: User).
    - Relationship: Many-to-One with Users.
+   - **Performance Indexes**:
+     - Compound Index: `{ author: 1, createdAt: -1 }` (Fast user recipe feeds).
+     - Text Index: `title` and `description` (Full-text search support).
+     - Sort Index: `createdAt` (Global feed sorting).
 3. **PantryItems**:
    - Fields: `name`, `quantity`, `author` (Ref: User).
 4. **SavedRecipes**:
@@ -78,7 +85,7 @@ The API is designed to mimic a Headless CMS (Strapi) structure:
 - **Auth Strategy**: JWT (JSON Web Tokens) with a 7-day expiration.
 - **Cookie Security**: Tokens are sent in an `HttpOnly`, `Secure` cookie to prevent Cross-Site Scripting (XSS).
 - **Network Security**: **Arcjet** acts as a Shield WAF, blocking common attacks (SQLi, XSS) and unwanted bots.
-- **Rate Limiting**: Implemented via Arcjet based on a per-user token bucket algorithm (different limits for Free vs Pro).
+- **Rate Limiting**: Implemented via Arcjet Middleware in the Backend (`middleware/rate-limit.js`) to protect expensive AI routes.
 
 ---
 
@@ -86,6 +93,10 @@ The API is designed to mimic a Headless CMS (Strapi) structure:
 
 - **Gemini 1.5 Flash**: Chosen specifically for its balance of high reasoning power and ultra-low latency.
 - **Stale-While-Revalidate**: Next.js cache headers are used to prevent redundant AI calls if a recipe was generated recently.
+- **Database Optimization**: Strategic indexing on MongoDB collections ensures sub-millisecond query times even with large datasets.
+- **Client-Side Optimization**:
+  - **Web Workers**: PDF generation is non-blocking.
+  - **Lazy Loading**: Images use a "Pulse-to-Fade" pattern (animated placeholders followed by a smooth 500ms transition) to improve perceived performance and Core Web Vitals.
 - **Scalability**: The backend is stateless, meaning multiple instances can be spun up behind a load balancer without data sync issues.
 
 ---
@@ -103,6 +114,6 @@ The API is designed to mimic a Headless CMS (Strapi) structure:
 ### Data Lifecycle Diagram:
 
 - **Input**: User uploads image.
-- **Process A**: Frontend → Gemini Vision → Ingredient List.
-- **Process B**: Frontend → Gemini Text → Full Recipe Schema.
+- **Process A**: Frontend → Backend API → Gemini Vision → Ingredient List.
+- **Process B**: Frontend → Backend API → Gemini Text → Full Recipe Schema.
 - **Output**: JSON stored in MongoDB → Rendered as Card in UI.

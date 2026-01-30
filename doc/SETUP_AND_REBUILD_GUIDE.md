@@ -24,8 +24,8 @@ This guide provides a comprehensive, step-by-step walkthrough to rebuild the **S
 | **Express.js (Manual)**     | Backend    | Lightweight but robust control over API behavior and MongoDB interactions.           |
 | **MongoDB + Mongoose**      | Database   | Flexible NoSQL schema allows for complex, nested recipe data.                        |
 | **Google Gemini AI**        | AI Engine  | State-of-the-art vision and text generation with low latency (Flash models).         |
-| **Arcjet**                  | Security   | Next-gen WAF and rate-limiting tailored for Next.js.                                 |
-| **Unsplash API**            | Media      | Dynamic, high-quality image sourcing for generated recipes.                          |
+| **Arcjet**                  | Security   | Backend middleware for rate-limiting and WAF protection.                             |
+| **Unsplash API**            | Media      | Backend service for fetching dynamic recipe images.                                  |
 
 ---
 
@@ -37,14 +37,15 @@ This guide provides a comprehensive, step-by-step walkthrough to rebuild the **S
 - `actions/`: **Server Actions**. Contains the core "business logic" (AI calls, DB updates via fetch).
 - `components/`: UI components. Separated into `ui` (primitives) and feature-specific components.
 - `lib/`: Utilities, contexts (Auth), and static data.
-  - `ai/`: **Modular AI Layer**. Contains AI prompts, clients, and image services.
+  - `api.js`: Helper for authenticated fetch requests.
 - `hooks/`: Custom React hooks.
 
-### Backend (`/backend-manual`)
+### Backend (`/backend`)
 
 - `models/`: Mongoose schemas (User, Recipe, PantryItem).
 - `routes/`: Express API endpoints.
-- `middleware/`: Authentication checks (JWT) and logic.
+- `middleware/`: Auth verification and Arcjet Rate Limiting.
+- `lib/ai/`: **Hub for AI Logic**. Gemini Client, Prompts, and Image Service.
 - `server.js`: Main entry point for the Express server.
 
 ---
@@ -55,9 +56,9 @@ You will need the following API keys and tools:
 
 1. **Node.js LTS** (v20+)
 2. **MongoDB Atlas** (External URI or Local)
-3. **Google AI Studio Key** (for Gemini)
-4. **Arcjet Key** (for rate limiting)
-5. **Unsplash Access Key** (for images)
+3. **Google AI Studio Key** (Add to Backend .env)
+4. **Arcjet Key** (Add to Backend .env)
+5. **Unsplash Access Key** (Add to Backend .env)
 6. **JWT Secret** (any random string)
 
 ---
@@ -82,13 +83,10 @@ Create two main folders: `frontend` and `backend-manual`. Initialize `npm` in bo
 
 ### Step 4: Integrating AI Features (The Heart)
 
-1. **AI Utility Layer**: Create `lib/ai/` to store shared AI clients, image fetching services, and complex prompt strings. This keeps action files clean and readable.
-2. **Recipe Action**: Create `actions/recipe.actions.js`. Write a function that:
-   - Uses the shared Gemini client from `lib/ai/client.js`.
-   - Imports a structured prompt from `lib/ai/prompts.js`.
-   - Fetches images via the `image-service.js`.
-   - Orchestrates the generation and saves it to the backend DB.
-3. **Vision Action**: Create `actions/pantry.actions.js`. Convert uploaded images to `base64` and send them to the vision model using modular prompts.
+1. **Backend AI Layer**: Create `backend/lib/ai/`. Move `client.js` (Gemini Config), `prompts.js`, and `image-service.js` here.
+2. **AI Routes**: Create `backend/routes/recipes.js` and `pantry.js`. Implement endpoints (`/generate`, `/suggest`, `/scan`) that use the AI layer.
+3. **Frontend API Helper**: Create `frontend/lib/api.js` with a `fetchWithAuth` function to handle token headers automatically.
+4. **Connect Actions**: Update `frontend/actions/` to use `fetchWithAuth` to call your new backend endpoints.
 
 ### Step 5: PDF and Polish
 
@@ -116,7 +114,7 @@ Create two main folders: `frontend` and `backend-manual`. Initialize `npm` in bo
 
 ## 8. How to Run Locally
 
-1. Start Backend: `cd backend-manual && npm run dev` (Port 1337).
+1. Start Backend: `cd backend && npm run dev` (Port 1337).
 2. Start Frontend: `cd frontend && npm run dev` (Port 3000).
 3. Ensure `.env` files are populated in both directories.
 

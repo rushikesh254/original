@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Clock, Users, ChefHat } from "lucide-react";
@@ -62,6 +63,7 @@ export default function RecipeCard({ recipe, variant = "default" }) {
     return {};
   };
 
+  const [loaded, setLoaded] = useState(false);
   const data = getRecipeData();
 
   // Variant: grid (for category/cuisine pages with images)
@@ -76,9 +78,16 @@ export default function RecipeCard({ recipe, variant = "default" }) {
                 src={data.image}
                 alt={data.title}
                 fill
-                className="object-cover"
+                className={`object-cover transition-opacity duration-500 ${
+                  loaded ? "opacity-100" : "opacity-0"
+                }`}
+                onLoad={() => setLoaded(true)}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                priority={false}
               />
+              {!loaded && (
+                <div className="absolute inset-0 bg-stone-200 animate-pulse" />
+              )}
 
               {/* Hover Overlay */}
               <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
@@ -119,9 +128,16 @@ export default function RecipeCard({ recipe, variant = "default" }) {
               src={data.image}
               alt={data.title}
               fill
-              className="object-cover"
+              className={`object-cover transition-opacity duration-500 ${
+                loaded ? "opacity-100" : "opacity-0"
+              }`}
+              onLoad={() => setLoaded(true)}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority={false}
             />
+            {!loaded && (
+              <div className="absolute inset-0 bg-stone-200 animate-pulse" />
+            )}
             {/* Match Percentage Badge on Image */}
             {data.matchPercentage && (
               <div className="absolute top-4 right-4">
@@ -130,8 +146,8 @@ export default function RecipeCard({ recipe, variant = "default" }) {
                     data.matchPercentage >= 90
                       ? "bg-green-600"
                       : data.matchPercentage >= 75
-                      ? "bg-orange-600"
-                      : "bg-stone-600"
+                        ? "bg-orange-600"
+                        : "bg-stone-600"
                   } text-white text-lg px-3 py-1.5 shadow-lg`}
                 >
                   {data.matchPercentage}% Match
@@ -171,8 +187,8 @@ export default function RecipeCard({ recipe, variant = "default" }) {
                     data.matchPercentage >= 90
                       ? "bg-green-600"
                       : data.matchPercentage >= 75
-                      ? "bg-orange-600"
-                      : "bg-stone-600"
+                        ? "bg-orange-600"
+                        : "bg-stone-600"
                   } text-white text-lg px-3 py-1`}
                 >
                   {data.matchPercentage}%
@@ -262,9 +278,16 @@ export default function RecipeCard({ recipe, variant = "default" }) {
                   src={data.image}
                   alt={data.title}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  className={`object-cover group-hover:scale-105 transition-all duration-500 ${
+                    loaded ? "opacity-100" : "opacity-0"
+                  }`}
+                  onLoad={() => setLoaded(true)}
                   sizes="(max-width: 768px) 100vw, 192px"
+                  priority={false}
                 />
+                {!loaded && (
+                  <div className="absolute inset-0 bg-stone-200 animate-pulse" />
+                )}
               </div>
             ) : (
               // Fallback gradient when no image
@@ -345,11 +368,19 @@ export default function RecipeCard({ recipe, variant = "default" }) {
               src={data.image}
               alt={data.title}
               fill
-              className="object-cover"
+              className={`object-cover transition-opacity duration-500 ${
+                loaded ? "opacity-100" : "opacity-0"
+              }`}
+              onLoad={() => setLoaded(true)}
               sizes="(max-width: 768px) 100vw, 400px"
+              priority={false}
             />
+            {!loaded && (
+              <div className="absolute inset-0 bg-stone-200 animate-pulse" />
+            )}
           </div>
         )}
+
         <CardHeader>
           <CardTitle className="text-lg">{data.title}</CardTitle>
           {data.description && (

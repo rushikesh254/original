@@ -22,7 +22,6 @@ export default function Header() {
   /**
    * LOADING STATE
    * If we don't know yet if the user is logged in (checking cookies), 
-   * we show a simple "Pulsing" placeholder.
    */
   if (!isLoaded) {
     return (

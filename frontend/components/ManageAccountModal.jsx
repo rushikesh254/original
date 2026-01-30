@@ -1,6 +1,6 @@
 /**
  * MANAGE ACCOUNT MODAL
- * This is the big popup where users can change their name, 
+ * This is the big popup where users can change their name,
  * update their password, or look at their billing.
  */
 "use client";
@@ -63,7 +63,11 @@ export default function ManageAccountModal({ isOpen, onClose }) {
    * Validation checks + API call to change password.
    */
   const handlePasswordChange = async () => {
-    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+    if (
+      !passwordData.currentPassword ||
+      !passwordData.newPassword ||
+      !passwordData.confirmPassword
+    ) {
       toast.error("Please fill in all password fields");
       return;
     }
@@ -78,10 +82,17 @@ export default function ManageAccountModal({ isOpen, onClose }) {
 
     setLoading(true);
     try {
-      await changePassword(passwordData.currentPassword, passwordData.newPassword);
+      await changePassword(
+        passwordData.currentPassword,
+        passwordData.newPassword,
+      );
       toast.success("Password updated successfully");
       setIsChangingPassword(false);
-      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
     } catch (error) {
       console.error(error);
       toast.error(error.message || "Failed to update password");
@@ -128,7 +139,8 @@ export default function ManageAccountModal({ isOpen, onClose }) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="w-full md:w-fit max-w-[95vw] md:max-w-5xl p-0 gap-0 overflow-hidden h-[90vh] md:h-[600px] flex flex-col md:flex-row sm:rounded-2xl">
-        
+        <DialogTitle className="sr-only">Manage Account</DialogTitle>
+
         {/* SIDEBAR (Left Side on Desktop, Top on Mobile) */}
         <div className="w-full md:w-64 bg-stone-50 border-b md:border-b-0 md:border-r border-stone-200 p-4 md:p-6 flex flex-col shrink-0">
           <div className="mb-4 md:mb-8 pl-2">
@@ -251,9 +263,7 @@ export default function ManageAccountModal({ isOpen, onClose }) {
                     <Button
                       variant="outline"
                       className="w-full justify-start text-stone-600 border-dashed border-stone-300 hover:border-stone-400 hover:bg-stone-50"
-                      onClick={() =>
-                        toast.info("This feature is coming soon!")
-                      }
+                      onClick={() => toast.info("This feature is coming soon!")}
                     >
                       + Add email address
                     </Button>
@@ -294,20 +304,19 @@ export default function ManageAccountModal({ isOpen, onClose }) {
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Switch Plans Button (Opens another Modal) */}
                     <PricingModal subscriptionTier={user?.subscriptionTier}>
-                       <Button
+                      <Button
                         variant="outline"
                         className="w-full justify-between group hover:border-orange-200 hover:bg-orange-50"
-                       >
+                      >
                         <span className="font-medium text-stone-700 group-hover:text-orange-700 flex items-center gap-2">
                           <Check className="w-4 h-4" />
                           Switch plans
                         </span>
                       </Button>
                     </PricingModal>
-                   
                   </div>
                 </div>
               </div>

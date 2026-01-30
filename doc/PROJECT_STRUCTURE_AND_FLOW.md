@@ -10,9 +10,16 @@ Below is the full recursive structure of the project (excluding `node_modules`, 
 
 ```text
 ai-recipe-platform-master/
-├── backend-manual/
+├── backend/ (renamed from backend-manual)
+│   ├── lib/
+│   │   ├── ai/                 # Modular AI Layer (Moved from Frontend)
+│   │   │   ├── client.js       # Shared Gemini initialization
+│   │   │   ├── image-service.js# Unsplash integration
+│   │   │   └── prompts.js      # Clean storage for AI prompts
+│   │   └── arcjet.js           # Arcjet Security Config
 │   ├── middleware/
-│   │   └── auth.js             # JWT Verification logic
+│   │   ├── auth.js             # JWT Verification logic
+│   │   └── rate-limit.js       # Arcjet Rate Limiting Middleware
 │   ├── models/
 │   │   ├── PantryItem.js       # Mongoose Schema: User ingredients
 │   │   ├── Recipe.js           # Mongoose Schema: AI Generated Recipes
@@ -20,8 +27,8 @@ ai-recipe-platform-master/
 │   │   └── User.js             # Mongoose Schema: Auth & Profile
 │   ├── routes/
 │   │   ├── auth.js             # Endpoints: Login, Signup, Logout
-│   │   ├── pantry.js           # Endpoints: Pantry CRUD
-│   │   ├── recipes.js          # Endpoints: Recipe search & creation
+│   │   ├── pantry.js           # Endpoints: Pantry CRUD & AI Scan
+│   │   ├── recipes.js          # Endpoints: Recipe search, generation & suggestions
 │   │   ├── saved-recipes.js    # Endpoints: User collections
 │   │   └── users.js            # Endpoints: Profile management
 │   ├── package.json
@@ -35,8 +42,8 @@ ai-recipe-platform-master/
 ├── frontend/
 │   ├── actions/
 │   │   ├── mealdb.actions.js   # External API integration logic
-│   │   ├── pantry.actions.js   # Gemini Vision & Pantry Sync
-│   │   └── recipe.actions.js   # Gemini Text Generation & Storage
+│   │   ├── pantry.actions.js   # Calls Backend API (formerly contained logic)
+│   │   └── recipe.actions.js   # Calls Backend API (formerly contained logic)
 │   ├── app/
 │   │   ├── (auth)/             # Auth Route Group
 │   │   │   ├── sign-in/
@@ -46,7 +53,6 @@ ai-recipe-platform-master/
 │   │   │   ├── pantry/         # Ingredient Management
 │   │   │   ├── recipe/         # Recipe View/Generator
 │   │   │   └── recipes/        # Saved/Public Recipes
-│   │   ├── admin/              # Administrative Dashboard
 │   │   ├── globals.css         # Tailwind Root
 │   │   ├── layout.js           # Root Layout & Auth Provider
 │   │   └── page.js             # Landing Page
@@ -56,15 +62,11 @@ ai-recipe-platform-master/
 │   │   ├── Header.js           # Main Navigation
 │   │   └── PricingSection.js   # Subscription UI
 │   ├── lib/
-│   │   ├── ai/                 # Modular AI Layer
-│   │   │   ├── client.js       # Shared Gemini initialization
-│   │   │   ├── image-service.js# Unsplash integration
-│   │   │   └── prompts.js      # Clean storage for AI prompts
-│   │   ├── arcjet.js           # Security & Rate Limits
+│   │   ├── api.js              # Fetch Helper (fetchWithAuth)
 │   │   ├── auth-context.js     # React Auth Context (Auth State)
 │   │   ├── data.js             # Static configuration data
 │   │   └── serverAuth.js       # Server-side auth helpers
-│   ├── middleware.js           # Next.js Auth & Arcjet Middleare
+│   ├── middleware.js           # Next.js Auth Middleware
 │   ├── next.config.mjs
 │   └── package.json
 └── README.md
@@ -76,26 +78,31 @@ ai-recipe-platform-master/
 
 ### 🔄 Scenario: Pantry Scanning to Recipe Generation
 
-The platform uses a "Hybrid Server-Sync" model where the frontend server orchestrates AI and the backend persists data.
+The platform uses a "Thin Client, Heavy Server" model. The frontend handles UI and auth tokens, while the backend orchestrates AI processing and DB persistence.
 
 ```mermaid
 graph TD
     A[User Uploads Image] --> B[Next.js Server Action]
-    B --> C{Gemini Vision API}
-    C -->|Extracts| D[Ingredient List JSON]
-    D --> E[User Confirms/Edits]
-    E --> F[Next.js Server Action: Save]
-    F --> G[Express Backend]
-    G --> H[(MongoDB: PantryItems)]
+    B --> C[Fetch /api/pantry-items/scan]
+    C --> D[Express Backend Middleware]
+    D --> E{Arcjet Rate Limit}
+    E --> F{Gemini Vision API}
+    F -->|Extracts| G[Ingredient List JSON]
+    G --> H[Frontend: Show Ingredients]
+    H --> I[User Confirms & Saves]
+    I --> J[Fetch /api/pantry-items]
+    J --> K[(MongoDB: PantryItems)]
 
-    H --> I[User Requests Recipe]
-    I --> J[Next.js Server Action: Generate]
-    J --> K{Gemini 1.5 Flash API}
-    K -->|Prompts| L[Structured Recipe JSON]
-    L --> M[Unsplash API: Fetch Image]
-    M --> N[Express Backend]
-    N --> O[(MongoDB: Recipes)]
-    O --> P[Frontend: Render UI]
+    K --> L[User Requests Recipe]
+    L --> M[Next.js Server Action]
+    M --> N[Fetch /api/recipes/generate]
+    N --> O[Express Backend]
+    O --> P{Gemini 1.5 Flash API}
+    P -->|Prompts| Q[Structured Recipe JSON]
+    Q --> R{Unsplash API}
+    R -->|Fetch Image| S[Complete Recipe Object]
+    S --> T[(MongoDB: Recipes)]
+    T --> U[Frontend: Render UI]
 ```
 
 ---
@@ -105,13 +112,18 @@ graph TD
 ### **1. Authentication (JWT)**
 
 - **Issuance**: Backend `POST /api/auth/login` sets a Secure, HttpOnly cookie named `token`.
-- **Validation**: Every frontend request to the backend includes `credentials: 'include'`, which the Express `auth` middleware validates before processing logic.
+- **Validation**: Every frontend request to the backend includes `credentials: 'include'` (via `fetchWithAuth`), which the Express `auth` middleware validates.
 
-### **2. AI Security (Server Actions)**
+### **2. AI Security & Isolation**
 
-- **Isolation**: All AI calls (`@google/generative-ai`) are strictly in `frontend/actions/`, but the heavy logic is abstracted into `frontend/lib/ai/`. This "Double Layer" isolation prevents the `GEMINI_API_KEY` from leaking and keeps action files readable.
-- **Rate Limiting**: **Arcjet** check logic is integrated directly inside the Server Actions to prevent API abuse before the call is even made.
+- **Backend-Only AI**: To improve security and separation of concerns, **Google Generative AI** and **Unsplash** clients are initialized entirely within `backend/lib/ai/`.
+- **No Keys on Client**: `GEMINI_API_KEY` and `UNSPLASH_ACCESS_KEY` effectively never leave the backend environment.
+- **Rate Limiting**: **Arcjet** logic is implemented as Express middleware (`backend/middleware/rate-limit.js`), protecting expensive AI endpoints (`/scan`, `/suggest`) from abuse.
 
 ### **3. Data Synchronization**
 
-- **Manual Backend Strategy**: Instead of using a complex CMS, the Express backend serves as a clean, predictable API that handles JSON objects wrapped in a `data` envelope, ensuring parity with frontend data expectations.
+- **Pure API Wrappers**: The frontend actions (`pantry.actions.js`, `recipe.actions.js`) are strictly wrappers. They handle the "Base64" conversion for images but delegate all logic (Validation, AI, DB) to the Express Backend.
+- **Performance Patterns**:
+  - **Web Worker PDF**: Generation logic uses `pdf-lib` inside `public/pdf-worker.js`, keeping the main thread free.
+  - **Image UX**: `RecipeCard.jsx` implements animated pulse placeholders and fade-in transitions for all images.
+- **Unified Fetch**: A `fetchWithAuth` helper in the frontend ensures consistent error handling and token passing for all requests.

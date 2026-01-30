@@ -21,7 +21,7 @@ This document provides a detailed mapping of the architecture, tech stack, and s
 | **UI Component Library** | shadcn/ui, Lucide React | Premium UI components built on Radix UI primitives for accessibility.            |
 | **Styling**              | Tailwind CSS v4, `clsx` | Next-gen Tailwind with CSS-first configuration and utility merging.              |
 | **State Management**     | React Context API       | Handled via `auth-context.js` for session management; native hooks for UI state. |
-| **AI Integration**       | `@google/generative-ai` | Direct integration with Google Gemini for recipe generation.                     |
+| **AI Integration**       | `@google/generative-ai` | **Backend-side** integration with Google Gemini for recipe generation.           |
 | **PDF Generation**       | `@react-pdf/renderer`   | Client/Server-side PDF generation for recipes.                                   |
 | **Form/Input Handling**  | shadcn/ui, `sonner`     | Used for polished dialogs, tabs, and toast notifications.                        |
 
@@ -33,7 +33,7 @@ This document provides a detailed mapping of the architecture, tech stack, and s
 | :---------------- | :------------ | :----------------------------------------------------------------------------- |
 | **Database Type** | **MongoDB**   | NoSQL document-oriented database for flexible recipe schemas.                  |
 | **ORM/ODM**       | **Mongoose**  | Used for schema validation, document mapping, and middleware (hooks).          |
-| **User Schema**   | `User.js`     | Includes `email`, `password` (hashed), `subscriptionTier`, and `role`.         |
+| **User Schema**   | `User.js`     | Includes `email`, `password` (hashed), and `subscriptionTier`.                 |
 | **Recipe Schema** | `Recipe.js`   | Complex document structure for `ingredients`, `instructions`, and AI metadata. |
 | **Relationships** | ObjectId Refs | Relational links between `User` and `Recipe` using Mongoose `ref`.             |
 
@@ -41,22 +41,22 @@ This document provides a detailed mapping of the architecture, tech stack, and s
 
 ### 4. Security Audit
 
-| Implementation          | Method                   | Description                                                               |
-| :---------------------- | :----------------------- | :------------------------------------------------------------------------ |
-| **Authentication**      | **JWT (JSON Web Token)** | Tokens are stored in **HTTP-only cookies** for protection against XSS.    |
-| **Password Security**   | **Bcrypt**               | Passwords are salted and hashed (10 rounds) before DB persistence.        |
-| **Advanced Protection** | **Arcjet**               | Implements **WAF (Shield)** and **Bot Detection** via Next.js middleware. |
-| **Middleware**          | `cors`, `cookie-parser`  | Backend restricts origins and handles secure cookie parsing.              |
-| **Auth Guard**          | Next.js Middleware       | Centralized route protection for `/recipe`, `/pantry`, and `/dashboard`.  |
-| **Secrets Handling**    | `.env` / `.env.local`    | Properly ignored in `.gitignore`; environment-specific configs.           |
+| Implementation          | Method                   | Description                                                              |
+| :---------------------- | :----------------------- | :----------------------------------------------------------------------- |
+| **Authentication**      | **JWT (JSON Web Token)** | Tokens are stored in **HTTP-only cookies** for protection against XSS.   |
+| **Password Security**   | **Bcrypt**               | Passwords are salted and hashed (10 rounds) before DB persistence.       |
+| **Advanced Protection** | **Arcjet**               | Backend Middleware (Express) for Rate Limiting and Bot Detection.        |
+| **Middleware**          | `cors`, `cookie-parser`  | Backend restricts origins and handles secure cookie parsing.             |
+| **Auth Guard**          | Next.js Middleware       | Centralized route protection for `/recipe`, `/pantry`, and `/dashboard`. |
+| **Secrets Handling**    | `.env` / `.env.local`    | Properly ignored in `.gitignore`; environment-specific configs.          |
 
 ---
 
 ### 5. Project Organization
 
-| Folder                  | Pattern         | Purpose                                                                         |
-| :---------------------- | :-------------- | :------------------------------------------------------------------------------ |
-| `frontend/app`          | **App Router**  | Directory-based routing with layouts, pages, and server components.             |
-| `frontend/components`   | **Atomic-ish**  | Separation of UI primitives (Shadcn-style) and feature components.              |
-| `backend-manual/routes` | **Modular API** | Clean separation of concerns for `auth`, `users`, `recipes`, and `pantry`.      |
-| `backend-manual/models` | **Data Layer**  | Centralized schema definitions with lifecycle hooks (e.g., `pre-save` hashing). |
+| Folder                | Pattern         | Purpose                                                                         |
+| :-------------------- | :-------------- | :------------------------------------------------------------------------------ |
+| `frontend/app`        | **App Router**  | Directory-based routing with layouts, pages, and server components.             |
+| `frontend/components` | **Atomic-ish**  | Separation of UI primitives (Shadcn-style) and feature components.              |
+| `backend/routes`      | **Modular API** | Clean separation of logic. AI features are exposed via specific endpoints.      |
+| `backend/models`      | **Data Layer**  | Centralized schema definitions with lifecycle hooks (e.g., `pre-save` hashing). |

@@ -24,6 +24,28 @@ const styles = StyleSheet.create({
   },
 });
 
+export async function generatePDF(recipe) {
+  if (typeof window !== "undefined" && window.Worker) {
+    const worker = new Worker("/pdf-worker.js");
+    return new Promise((resolve, reject) => {
+      worker.postMessage({ recipe });
+      worker.onmessage = (e) => {
+        if (e.data.error) {
+          reject(new Error(e.data.error));
+        } else {
+          resolve(e.data); // Returns pdfBytes
+        }
+        worker.terminate();
+      };
+      worker.onerror = (err) => {
+        reject(err);
+        worker.terminate();
+      };
+    });
+  }
+  throw new Error("Web Workers are not supported in this browser.");
+}
+
 export function RecipePDF({ recipe }) {
   // Safely calculate total time with defaults
   const prepTime = parseInt(recipe?.prepTime) || 0;
