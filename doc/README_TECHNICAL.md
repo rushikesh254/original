@@ -6,7 +6,7 @@
 
 ## 🚀 Features
 
-- **AI Pantry Scanner**: Snap a photo of your fridge or pantry, and the system uses Gemini Vision (AI) to identify and list every ingredient automatically.
+- **AI Pantry Scanner**: Snap a photo of your fridge or pantry, and the system uses Gemini 2.5 Flash Vision (AI) to identify and list every ingredient automatically.
 - **Smart Recipe Generation**: Describe what you're craving (e.g., "high protein breakfast"), and the AI generates a complete recipe with ingredients, instructions, and nutritional info.
 - **"Cook With What You Have"**: Based on your scanned pantry items, the system suggests 5 unique recipes you can cook _right now_ without buying extra groceries.
 - **Dynamic Image Sourcing**: Every generated recipe automatically fetches a high-quality, relevant image from Unsplash.
@@ -119,8 +119,8 @@ erDiagram
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Next.js 16 (App Router), Tailwind CSS v4, Lucide React, Shadcn/UI
-- **Backend**: Node.js, Express.js 5, JavaScript (Modules)
+- **Frontend**: Next.js 16.1.1 (App Router), Tailwind CSS v4, Lucide React, Shadcn/UI
+- **Backend**: Node.js, Express.js 5.2.1, JavaScript (Modules)
 - **Database**: MongoDB, Mongoose ODM
-- **AI & Media**: Google Gemini 1.5 Flash, Unsplash API
+- **AI & Media**: Google Gemini 2.5 Flash, Unsplash API
 - **Security**: Arcjet (WAF & Rate Limiting), JWT Auth, Bcrypt

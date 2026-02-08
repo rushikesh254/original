@@ -7,7 +7,7 @@
 ## 📚 Table of Contents
 
 1. [System Design & Architecture](#system-design--architecture)
-2. [Frontend (React 19 & Next.js 16)](#frontend-react-19--nextjs-16)
+2. [Frontend (React 19 & Next.js 16.1.1)](#frontend-react-19--nextjs-16)
 3. [Backend (Express & Node.js)](#backend-express--nodejs)
 4. [Database & Data Flow](#database--data-flow)
 5. [Authentication & Security](#authentication--security)
@@ -26,7 +26,7 @@
 Hamara architecture **Decoupled Client-Server Architecture** follow karta hai:
 
 ```
-Frontend (Next.js 16)
+Frontend (Next.js 16.1.1)
     ↓ (HTTP + JWT)
 Server Actions (API Wrapper)
     ↓ (Thin orchestration layer)
@@ -34,7 +34,7 @@ Backend (Express.js)
     ↓ (Business logic + validation)
 Services (AI, Auth, DB)
     ↓ (External + Internal APIs)
-Database (MongoDB) + Gemini + Unsplash
+Database (MongoDB) + Google Gemini AI + Unsplash
 ```
 
 **Kyun ye architecture?**
@@ -113,7 +113,6 @@ Backend Monolith:
 │   │   ├── client.js
 │   │   ├── image-service.js
 │   │   └── prompts.js
-│   └── arcjet.js     (Security)
 └── models/           (Data models)
 ```
 
@@ -467,7 +466,7 @@ Agar exceed karein:
 
 ---
 
-## Frontend (React 19 & Next.js 16)
+## Frontend (React 19 & Next.js 16.1.1)
 
 ### Q9: **Server Actions vs Traditional API Routes - kaunsa choose kiya aur kyun?**
 
@@ -1701,7 +1700,7 @@ node_modules/       # Never commit
 ```javascript
 // Vercel (Frontend):
 // Dashboard → Settings → Environment Variables
-NEXT_PUBLIC_STRAPI_URL=https://api.recipeapp.com
+NEXT_PUBLIC_API_URL=https://api.recipeapp.com
 
 // Render (Backend):
 // Dashboard → Services → Environment → Environment Variables

@@ -10,7 +10,7 @@ Below is the full recursive structure of the project (excluding `node_modules`, 
 
 ```text
 ai-recipe-platform-master/
-├── backend/ (renamed from backend-manual)
+├── backend/
 │   ├── lib/
 │   │   ├── ai/                 # Modular AI Layer (Moved from Frontend)
 │   │   │   ├── client.js       # Shared Gemini initialization
@@ -19,7 +19,8 @@ ai-recipe-platform-master/
 │   │   └── arcjet.js           # Arcjet Security Config
 │   ├── middleware/
 │   │   ├── auth.js             # JWT Verification logic
-│   │   └── rate-limit.js       # Arcjet Rate Limiting Middleware
+│   │   ├── rate-limit.js       # Arcjet Rate Limiting Middleware
+│   │   └── validate.js         # Zod Schema Validation Middleware
 │   ├── models/
 │   │   ├── PantryItem.js       # Mongoose Schema: User ingredients
 │   │   ├── Recipe.js           # Mongoose Schema: AI Generated Recipes
@@ -31,6 +32,10 @@ ai-recipe-platform-master/
 │   │   ├── recipes.js          # Endpoints: Recipe search, generation & suggestions
 │   │   ├── saved-recipes.js    # Endpoints: User collections
 │   │   └── users.js            # Endpoints: Profile management
+│   ├── schemas/                # Zod Runtime Schemas
+│   │   ├── auth.js
+│   │   ├── pantry.js
+│   │   └── recipe.js
 │   ├── package.json
 │   └── server.js               # Entry: DB Connection & Server Config
 ├── doc/
@@ -62,6 +67,10 @@ ai-recipe-platform-master/
 │   │   ├── Header.js           # Main Navigation
 │   │   └── PricingSection.js   # Subscription UI
 │   ├── lib/
+│   │   ├── schemas/            # Zod Client-side Schemas
+│   │   │   ├── auth.js
+│   │   │   ├── pantry.js
+│   │   │   └── recipe.js
 │   │   ├── api.js              # Fetch Helper (fetchWithAuth)
 │   │   ├── auth-context.js     # React Auth Context (Auth State)
 │   │   ├── data.js             # Static configuration data
@@ -97,7 +106,7 @@ graph TD
     L --> M[Next.js Server Action]
     M --> N[Fetch /api/recipes/generate]
     N --> O[Express Backend]
-    O --> P{Gemini 1.5 Flash API}
+    O --> P{Gemini 2.5 Flash API}
     P -->|Prompts| Q[Structured Recipe JSON]
     Q --> R{Unsplash API}
     R -->|Fetch Image| S[Complete Recipe Object]

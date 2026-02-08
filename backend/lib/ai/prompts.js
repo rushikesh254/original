@@ -51,7 +51,8 @@ Return ONLY a valid JSON object with this exact structure (no markdown, no expla
       "original": "ingredient name",
       "alternatives": ["substitute 1", "substitute 2"]
     }
-  ]
+  ],
+  "isVeg": true
 }
 
 IMPORTANT RULES FOR CATEGORY:
@@ -73,6 +74,7 @@ Guidelines:
 - Provide practical cooking tips
 - Estimate realistic cooking times
 - Keep total instructions under 12 steps
+- IMPORTANT: Set "isVeg" to true if the recipe is vegetarian (no meat, poultry, fish, or seafood). Set to false if it contains any meat, poultry, fish, or seafood.
 `;
 
 /**
@@ -118,7 +120,8 @@ Return ONLY a valid JSON array (no markdown, no explanations):
     "cuisine": "italian|chinese|mexican|etc",
     "prepTime": 20,
     "cookTime": 30,
-    "servings": 4
+    "servings": 4,
+    "isVeg": true
   }
 ]
 
@@ -127,6 +130,7 @@ Rules:
 - missingIngredients should be common items or optional additions
 - Sort by matchPercentage descending
 - Make recipes realistic and delicious
+- IMPORTANT: Set "isVeg" to true if the recipe is vegetarian (no meat, poultry, fish, or seafood). Set to false if it contains any meat, poultry, fish, or seafood.
 `;
 
 module.exports = {

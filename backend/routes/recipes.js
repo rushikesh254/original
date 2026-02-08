@@ -206,7 +206,7 @@ router.post("/generate", auth, async (req, res) => {
     }
 
     // 2. Generate with Gemini AI
-    const model = getGeminiModel("gemini-2.0-flash");
+    const model = getGeminiModel("gemini-2.5-flash");
     const prompt = RECIPE_GENERATION_PROMPT(normalizedTitle);
 
     const result = await model.generateContent(prompt);
@@ -245,6 +245,7 @@ router.post("/generate", auth, async (req, res) => {
         nutrition: recipeData.nutrition,
         tips: recipeData.tips,
         substitutions: recipeData.substitutions,
+        isVeg: typeof recipeData.isVeg === 'boolean' ? recipeData.isVeg : null,
         imageUrl: imageUrl || "",
         isPublic: true,
         author: req.userId, // User who triggered generation is the "author"
@@ -288,7 +289,7 @@ router.post("/suggest", auth, rateLimit("suggestion"), async (req, res) => {
     const ingredientsList = pantryItems.map((item) => item.name).join(", ");
 
     // 2. Ask Gemini
-    const model = getGeminiModel("gemini-2.0-flash");
+    const model = getGeminiModel("gemini-2.5-flash");
     const prompt = INGREDIENT_RECIPE_SUGGESTIONS_PROMPT(ingredientsList);
 
     const result = await model.generateContent(prompt);

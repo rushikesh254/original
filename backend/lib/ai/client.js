@@ -20,9 +20,9 @@ const getGenAI = () => {
 /**
  * GET SPECIFIC MODEL
  * Different models have different speeds/costs.
- * We use 'gemini-2.0-flash' because it's super fast and great for JSON.
+ * We use 'gemini-2.5-flash' because it's super fast and great for JSON.
  */
-const getGeminiModel = (modelName = "gemini-2.0-flash") => {
+const getGeminiModel = (modelName = "gemini-2.5-flash") => {
   return getGenAI().getGenerativeModel({ model: modelName });
 };
 

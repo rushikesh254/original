@@ -6,7 +6,7 @@ This document outlines the architectural patterns, data flow, and design decisio
 
 ## 1. High-Level System Architecture
 
-The platform follows a **Decoupled Client-Server Architecture** with a modern Next.js 16 frontend and a standalone Express.js backend.
+The platform follows a **Decoupled Client-Server Architecture** with a modern Next.js 16.1.1 frontend and a standalone Express.js backend.
 
 ### The Flow:
 
@@ -51,7 +51,7 @@ The frontend leverages the **Next.js App Router** pattern:
 
 ## 4. API Design & Data Flow
 
-The API is designed to mimic a Headless CMS (Strapi) structure:
+The API is designed with a clean, structured envelope pattern:
 
 - **Format**: All responses are wrapped in a `{ data: {} }` or `{ data: [] }` envelope.
 - **Filtering**: Supports basic URL query filters (e.g., `?filters[title][$eqi]=...`).
@@ -91,7 +91,7 @@ The API is designed to mimic a Headless CMS (Strapi) structure:
 
 ## 7. Performance & Scalability
 
-- **Gemini 1.5 Flash**: Chosen specifically for its balance of high reasoning power and ultra-low latency.
+- **Gemini 2.5 Flash**: Chosen specifically for its balance of high reasoning power and ultra-low latency.
 - **Stale-While-Revalidate**: Next.js cache headers are used to prevent redundant AI calls if a recipe was generated recently.
 - **Database Optimization**: Strategic indexing on MongoDB collections ensures sub-millisecond query times even with large datasets.
 - **Client-Side Optimization**:

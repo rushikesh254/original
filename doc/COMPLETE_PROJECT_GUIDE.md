@@ -2,9 +2,9 @@
 
 > An intelligent culinary assistant that transforms your pantry ingredients into professional recipes using Google Gemini AI and Unsplash images.
 
-**Last Updated:** January 30, 2026
+**Last Updated:** February 03, 2026
 **Project Status:** Active Development
-**Stack:** Next.js 16, Express.js, MongoDB, Google Gemini AI, Unsplash API
+**Stack:** Next.js 16.1.1, Express.js, MongoDB, Google Gemini 2.5 Flash, Unsplash API
 
 ---
 
@@ -65,7 +65,7 @@ Reduce food waste, save money on groceries, and inspire creative cooking by maki
 - Recognizes various food types and quantities
 - Supports multiple languages via Gemini
 
-**Technology:** Google Gemini 2.0 Flash Vision API
+**Technology:** Google Gemini 2.5 Flash Vision API
 
 ### 2. **Smart Recipe Generation**
 
@@ -85,7 +85,7 @@ Reduce food waste, save money on groceries, and inspire creative cooking by maki
 - Practical ingredient substitutions
 - Full nutritional breakdown
 
-**Technology:** Google Gemini 2.0 Flash, Unsplash API
+**Technology:** Google Gemini 2.5 Flash, Unsplash API
 
 ### 3. **Recipe Suggestions from Pantry**
 
@@ -135,30 +135,32 @@ Suggestions:
 ### Frontend
 
 ```
-Framework         Next.js 16 (App Router)
+Framework         Next.js 16.1.1 (App Router)
 Language          JavaScript/JSX
 UI Library        shadcn/ui (Radix UI + Tailwind CSS)
 State Management  React Context API + useState
-Styling           Tailwind CSS 4
+Styling           Tailwind CSS v4
 Icons             Lucide React
 Notifications     Sonner (Toast)
 PDF Export        React PDF + pdf-lib
 Image Upload      React Dropzone
 HTTP Client       Native Fetch API
 Auth              JWT (HTTP-Only Cookies)
+Validation        Zod (Client-side Form Validation)
 Web Workers       pdf-worker.js for background tasks
 ```
 
 ### Backend
 
 ```
-Framework         Express.js 5.2
+Framework         Express.js 5.2.1
 Language          Node.js / JavaScript
 Database          MongoDB (via Mongoose 9.1)
 ORM               Mongoose 9.1
+Validation        Zod (Runtime Schema Validation)
 Authentication    JWT (7-day expiration)
 Password Hashing  Bcrypt
-AI Model          Google Gemini 2.0 Flash
+AI Model          Google Gemini 2.5 Flash
 Image API         Unsplash
 Security          Arcjet (WAF + Rate Limiting)
 CORS              Enabled for frontend
@@ -308,7 +310,7 @@ User browses, finds recipe, clicks to view details
 
 ```javascript
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const MODEL = "gemini-2.0-flash"; // Ultra-fast model
+const MODEL = "gemini-2.5-flash"; // Ultra-fast model
 ```
 
 #### Pricing Tiers:
@@ -869,16 +871,16 @@ Layer 2: Routes (auth.js, recipes.js, etc.)
 Layer 3: Middleware (auth.js, rate-limit.js)
   ↓ Intercepts requests for validation
 
-Layer 4: Models (Mongoose Schemas)
-  ↓ Defines data structure and validation
-
-Layer 5: Services (lib/ai/)
+Layer 4:- `models/`: Mongoose schemas.
+- `schemas/`: Zod validation schemas.
+- `controllers/` (Implicit in routes): Logic handling.
+- `middleware/`: Cross-cutting concerns (Auth, Rate Limit, Validation).
   ↓ Encapsulates external API logic
-```
 
 #### **2. Frontend Architecture**
 
 ```
+
 Next.js App Router (File-based routing)
 ├── Server Components (Static pages)
 ├── Client Components (Interactive UI)
@@ -886,34 +888,38 @@ Next.js App Router (File-based routing)
 └── Components (Reusable UI pieces)
 
 State Management:
+
 - AuthContext (Global user state)
 - useState (Local component state)
 - Server Actions (API call orchestration)
+
 ```
 
 #### **3. Data Flow Pattern: "Thin Client, Heavy Backend"**
 
 ```
+
 User Action (UI Click)
-  ↓
+↓
 Next.js Server Action
-  ↓
+↓
 fetchWithAuth (Adds JWT token)
-  ↓
+↓
 Express Backend Route
-  ↓
+↓
 Auth Middleware (Validates JWT)
-  ↓
+↓
 Rate Limit Middleware (Arcjet)
-  ↓
+↓
 Business Logic (AI/DB operations)
-  ↓
+↓
 MongoDB Query/Save
-  ↓
+↓
 Response (Wrapped in { data: ... })
-  ↓
+↓
 Frontend Renders Result
-```
+
+````
 
 ---
 
@@ -950,7 +956,7 @@ Return User data (password excluded)
 Frontend stores auth state in AuthContext
         ↓
 Redirect to Dashboard
-```
+````
 
 **Login Flow:**
 
@@ -1890,8 +1896,8 @@ frontend/
 │   │
 │   ├── (auth)/                       # Auth route group
 │   │   ├── layout.js                 # Auth page layout
-│   │   ├── sign-in/[[...sign-in]]/   # Clerk sign-in (dynamic route)
-│   │   └── sign-up/[[...sign-up]]/   # Clerk sign-up (dynamic route)
+│   │   ├── sign-in/[[...sign-in]]/   # Sign-in page (custom JWT auth)
+│   │   └── sign-up/[[...sign-up]]/   # Sign-up page (custom JWT auth)
 │   │
 │   └── (main)/                       # Main app route group
 │       ├── layout.jsx                # Main app layout with nav
@@ -2681,7 +2687,7 @@ FRONTEND_URL=http://localhost:3000
 PORT=1337
 
 # Frontend .env.local
-NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
+NEXT_PUBLIC_API_URL=http://localhost:1337
 ```
 
 ### Development Servers

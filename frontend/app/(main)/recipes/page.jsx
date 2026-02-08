@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Bookmark, Loader2, ChefHat } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import useFetch from "@/hooks/use-fetch";
 import { getSavedRecipes } from "@/actions/recipe.actions";
 import RecipeCard from "@/components/RecipeCard";
+import RecipeFilters from "@/components/RecipeFilters";
 
 export default function SavedRecipesPage() {
   const {
@@ -15,11 +16,18 @@ export default function SavedRecipesPage() {
     fn: fetchSavedRecipes,
   } = useFetch(getSavedRecipes);
 
+  const [filteredRecipes, setFilteredRecipes] = useState([]);
+
   useEffect(() => {
     fetchSavedRecipes();
   }, []);
 
   const recipes = recipesData?.recipes || [];
+
+  // Callback to receive filtered recipes from RecipeFilters
+  const handleFilteredRecipes = useCallback((filtered) => {
+    setFilteredRecipes(filtered);
+  }, []);
 
   return (
     <div className="min-h-screen bg-stone-50 pt-24 pb-16 px-4">
@@ -45,10 +53,18 @@ export default function SavedRecipesPage() {
           </div>
         )}
 
-        {/* Recipes Grid */}
+        {/* Filters - Only show when we have recipes */}
         {!loading && recipes.length > 0 && (
+          <RecipeFilters
+            recipes={recipes}
+            onFilteredRecipes={handleFilteredRecipes}
+          />
+        )}
+
+        {/* Recipes Grid */}
+        {!loading && filteredRecipes.length > 0 && (
           <div className="grid md:grid-cols-2 gap-6">
-            {recipes.map((recipe) => (
+            {filteredRecipes.map((recipe) => (
               <RecipeCard
                 key={recipe.id || recipe._id}
                 recipe={recipe}
@@ -58,7 +74,22 @@ export default function SavedRecipesPage() {
           </div>
         )}
 
-        {/* Empty State */}
+        {/* No Results After Filtering */}
+        {!loading && recipes.length > 0 && filteredRecipes.length === 0 && (
+          <div className="bg-white rounded-3xl p-12 text-center border border-stone-200">
+            <div className="bg-stone-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <ChefHat className="w-10 h-10 text-stone-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-stone-900 mb-2">
+              No Matching Recipes
+            </h3>
+            <p className="text-stone-600 mb-4">
+              Try adjusting your filters to see more recipes.
+            </p>
+          </div>
+        )}
+
+        {/* Empty State - No saved recipes at all */}
         {!loading && recipes.length === 0 && (
           <div className="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-stone-200">
             <div className="bg-orange-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">

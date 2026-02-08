@@ -175,7 +175,7 @@ router.post("/scan", auth, rateLimit("scan"), async (req, res) => {
     if (!image) return res.status(400).json({ error: "Image data is required" });
 
     // 1. Call Gemini Vision
-    const model = getGeminiModel("gemini-2.0-flash");
+    const model = getGeminiModel("gemini-2.5-flash");
 
     // The image from frontend might have "data:image/jpeg;base64," prefix.
     // Gemini wants just the data, or we pass standard inlineData.

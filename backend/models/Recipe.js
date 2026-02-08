@@ -37,6 +37,9 @@ const RecipeSchema = new mongoose.Schema(
         tips: { type: [String] },     // Extra chef tips
         substitutions: { type: [Object] }, // e.g., "Use tofu instead of chicken"
         
+        // Dietary Type: Helps with filtering
+        isVeg: { type: Boolean, default: null }, // true=vegetarian, false=non-veg, null=unknown
+        
         // Ownership: This connects the recipe to the user who generated it
         author: {
             type: mongoose.Schema.Types.ObjectId,

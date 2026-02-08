@@ -26,7 +26,7 @@ export default function PricingSection({ subscriptionTier = "free" }) {
   return (
     <div className="max-w-6xl mx-auto">
       {/* 1. SECTION HEADER */}
-      <div className="mb-16">
+      <div className="mb-12">
         <h2 className="text-5xl md:text-6xl font-bold mb-4">Simple Pricing</h2>
         <p className="text-xl text-stone-600 font-light">
           Start for free. Upgrade to become a master chef.

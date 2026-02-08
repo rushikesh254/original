@@ -13,6 +13,28 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+// Diet Badge Component - Shows veg/non-veg icon overlay
+function DietBadge({ isVeg, size = "default" }) {
+  if (isVeg === null || isVeg === undefined) return null;
+
+  const sizeClasses =
+    size === "small" ? "w-6 h-6" : size === "large" ? "w-10 h-10" : "w-8 h-8";
+
+  return (
+    <div
+      className={`${sizeClasses} rounded-sm overflow-hidden shadow-lg bg-white`}
+    >
+      <Image
+        src={isVeg ? "/icons/veg-icon.png" : "/icons/nonveg-icon.png"}
+        alt={isVeg ? "Vegetarian" : "Non-Vegetarian"}
+        width={40}
+        height={40}
+        className="w-full h-full object-contain"
+      />
+    </div>
+  );
+}
+
 export default function RecipeCard({ recipe, variant = "default" }) {
   // Handle different recipe data structures
   const getRecipeData = () => {
@@ -23,6 +45,7 @@ export default function RecipeCard({ recipe, variant = "default" }) {
         image: recipe.strMealThumb,
         href: `/recipe?cook=${encodeURIComponent(recipe.strMeal)}`,
         showImage: true,
+        isVeg: recipe.isVeg ?? null,
       };
     }
 
@@ -41,10 +64,11 @@ export default function RecipeCard({ recipe, variant = "default" }) {
         image: recipe.imageUrl, // Add image support
         href: `/recipe?cook=${encodeURIComponent(recipe.title)}`,
         showImage: !!recipe.imageUrl, // Show if image exists
+        isVeg: recipe.isVeg ?? null,
       };
     }
 
-    // For Strapi recipes (saved recipes, search results)
+    // For standard recipes (saved recipes, search results)
     if (recipe) {
       return {
         title: recipe.title,
@@ -57,6 +81,7 @@ export default function RecipeCard({ recipe, variant = "default" }) {
         image: recipe.imageUrl,
         href: `/recipe?cook=${encodeURIComponent(recipe.title)}`,
         showImage: !!recipe.imageUrl,
+        isVeg: recipe.isVeg ?? null,
       };
     }
 
@@ -89,6 +114,11 @@ export default function RecipeCard({ recipe, variant = "default" }) {
                 <div className="absolute inset-0 bg-stone-200 animate-pulse" />
               )}
 
+              {/* Veg/Non-Veg Badge */}
+              <div className="absolute top-3 left-3">
+                <DietBadge isVeg={data.isVeg} size="default" />
+              </div>
+
               {/* Hover Overlay */}
               <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                 <div className="absolute bottom-0 left-0 right-0 p-4">
@@ -100,9 +130,13 @@ export default function RecipeCard({ recipe, variant = "default" }) {
             </div>
           ) : (
             // Fallback gradient background when no image
-            <div className="relative aspect-square bg-gradient-to-br from-orange-400 via-amber-400 to-yellow-400 flex items-center justify-center">
+            <div className="relative aspect-square bg-linear-to-br from-orange-400 via-amber-400 to-yellow-400 flex items-center justify-center">
               <ChefHat className="w-20 h-20 text-white/30" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />
+              {/* Veg/Non-Veg Badge */}
+              <div className="absolute top-3 left-3">
+                <DietBadge isVeg={data.isVeg} size="default" />
+              </div>
             </div>
           )}
 
@@ -154,6 +188,10 @@ export default function RecipeCard({ recipe, variant = "default" }) {
                 </Badge>
               </div>
             )}
+            {/* Veg/Non-Veg Badge */}
+            <div className="absolute top-4 left-4">
+              <DietBadge isVeg={data.isVeg} size="default" />
+            </div>
           </div>
         )}
 
@@ -273,7 +311,7 @@ export default function RecipeCard({ recipe, variant = "default" }) {
           <div className="flex flex-col md:flex-row">
             {/* Image (if available) */}
             {data.showImage ? (
-              <div className="relative w-full md:w-48 aspect-video md:aspect-square flex-shrink-0">
+              <div className="relative w-full md:w-48 aspect-video md:aspect-square shrink-0">
                 <Image
                   src={data.image}
                   alt={data.title}
@@ -288,11 +326,19 @@ export default function RecipeCard({ recipe, variant = "default" }) {
                 {!loaded && (
                   <div className="absolute inset-0 bg-stone-200 animate-pulse" />
                 )}
+                {/* Veg/Non-Veg Badge */}
+                <div className="absolute top-3 left-3">
+                  <DietBadge isVeg={data.isVeg} size="small" />
+                </div>
               </div>
             ) : (
               // Fallback gradient when no image
-              <div className="relative w-full md:w-48 aspect-video md:aspect-square flex-shrink-0 bg-gradient-to-br from-orange-400 to-amber-400 flex items-center justify-center">
+              <div className="relative w-full md:w-48 aspect-video md:aspect-square shrink-0 bg-linear-to-br from-orange-400 to-amber-400 flex items-center justify-center">
                 <ChefHat className="w-12 h-12 text-white/30" />
+                {/* Veg/Non-Veg Badge */}
+                <div className="absolute top-3 left-3">
+                  <DietBadge isVeg={data.isVeg} size="small" />
+                </div>
               </div>
             )}
 
@@ -378,6 +424,10 @@ export default function RecipeCard({ recipe, variant = "default" }) {
             {!loaded && (
               <div className="absolute inset-0 bg-stone-200 animate-pulse" />
             )}
+            {/* Veg/Non-Veg Badge */}
+            <div className="absolute top-3 left-3">
+              <DietBadge isVeg={data.isVeg} size="small" />
+            </div>
           </div>
         )}
 

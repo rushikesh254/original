@@ -26,7 +26,7 @@ async function upgradeUser(email) {
 }
 
 // Get email from command line or hardcode it
-const email = process.argv[2] || "rushikeshbodke885@gmail.com";
+const email = process.argv[2] || "[EMAIL_ADDRESS]";
 upgradeUser(email);
 
 

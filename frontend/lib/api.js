@@ -6,7 +6,7 @@
 
 import { getServerUser, getAuthToken } from "@/lib/serverAuth";
 
-const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1337";
 
 /**
  * FETCH WITH AUTH
@@ -27,7 +27,7 @@ export async function fetchWithAuth(endpoint, options = {}) {
   };
 
   // 3. Make the Request
-  const response = await fetch(`${STRAPI_URL}${endpoint}`, {
+  const response = await fetch(`${BACKEND_URL}${endpoint}`, {
     ...options,
     headers,
   });

@@ -21,7 +21,7 @@ This document provides a detailed mapping of the architecture, tech stack, and s
 | **UI Component Library** | shadcn/ui, Lucide React | Premium UI components built on Radix UI primitives for accessibility.            |
 | **Styling**              | Tailwind CSS v4, `clsx` | Next-gen Tailwind with CSS-first configuration and utility merging.              |
 | **State Management**     | React Context API       | Handled via `auth-context.js` for session management; native hooks for UI state. |
-| **AI Integration**       | `@google/generative-ai` | **Backend-side** integration with Google Gemini for recipe generation.           |
+| **AI Integration**       | `@google/generative-ai` | **Backend-side** integration with Google Gemini 2.5 for recipe generation.       |
 | **PDF Generation**       | `@react-pdf/renderer`   | Client/Server-side PDF generation for recipes.                                   |
 | **Form/Input Handling**  | shadcn/ui, `sonner`     | Used for polished dialogs, tabs, and toast notifications.                        |
 
